@@ -1,0 +1,4 @@
+rootProject.name = 'parallels-labs5'
+include 'DateClient'
+include 'Server'
+

@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.kpi'
+version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation files('/Users/nikitagagua/Downloads/mpj-v0_44/lib/mpj.jar')
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+task runMPI(type: Exec) {
+    def mpjHome = '/Users/nikitagagua/Downloads/mpj-v0_44'
+    def buildMainPath = "$buildDir/classes/java/main"
+    def mainClass = 'org.kpi.Main'  // ← теперь верно
+
+    environment 'MPJ_HOME', mpjHome
+    environment 'CLASSPATH', "$mpjHome/lib/mpj.jar:$mpjHome/lib/starter.jar:$buildMainPath"
+    environment 'JAVA_HOME', System.getenv('JAVA_HOME') ?: ['bash', '-c', '/usr/libexec/java_home -v 11'].execute().text.trim()
+
+    commandLine "$mpjHome/bin/mpjrun.sh", '-np', '4', mainClass
+    dependsOn classes
+    workingDir file(buildMainPath)
+
+    doFirst {
+        println "mpjrun.sh exists: ${file("$mpjHome/bin/mpjrun.sh").exists()}"
+        println "starter.jar exists: ${file("$mpjHome/lib/starter.jar").exists()}"
+        println "Main.class path: ${mainClass.replace('.', '/') + '.class'}"
+        println "Main.class exists: ${file("$buildMainPath/${mainClass.replace('.', '/')}.class").exists()}"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
